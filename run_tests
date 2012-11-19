@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+
+import glob
+import unittest
+
+testmodules = [ filename[0:-3] for filename in glob.glob("test_*.py") ]
+
+suite = unittest.TestSuite()
+
+for t in testmodules:
+    suite.addTest(unittest.defaultTestLoader.loadTestsFromName(t))
+
+unittest.TextTestRunner().run(suite)

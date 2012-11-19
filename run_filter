@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+from filter import MyFilter
+from utils import read_classification_from_file
+from quality import compute_quality_for_corpus
+import sys
+
+_, TRAIN_DIR, TEST_DIR = sys.argv
+
+f = MyFilter()
+f.train(TRAIN_DIR)
+f.test(TEST_DIR)
+
+truth = read_classification_from_file(TEST_DIR + "/!truth.txt")
+prediction = read_classification_from_file(TEST_DIR + "/!prediction.txt")
+unpredicted = dict([(id, True) for id in truth.keys()])
+total = len(prediction)
+good = total
+fp = 0
+fn = 0
+
+for id, classification in prediction.items():
+	if truth[id] != classification:
+		print(id + " is not " + classification)
+		good -= 1
+
+		if classification == "SPAM":
+			fp += 1
+		else:
+			fn += 1
+
+	del unpredicted[id]
+
+for id in unpredicted.keys():
+	print(id + " not OK, no prediction")
+	good -= 1
+
+print("Q=%f" % compute_quality_for_corpus(TEST_DIR))
+print("P=%.3f%%" % (good / total * 100))
+print("FP/FN=%d/%d" % (fp, fn))
